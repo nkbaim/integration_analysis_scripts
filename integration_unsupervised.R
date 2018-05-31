@@ -33,7 +33,9 @@ Rdata = NULL
 Mdata = NULL
 
 
-dtl = vector("list",4)
+#dtl = vector("list",4)
+dtl=list()
+
 ntypes = 0
 type = c()
 row.order = c()
@@ -52,6 +54,7 @@ if(!is.null(opt$DNA)){
 }
 if(!is.null(opt$CNV)){
   ntypes = ntypes +1
+  Cdata = read.table(opt$CNV,h=T,row.names = 1)
   dtl[[ntypes]] = t(Cdata)
   type = c(type,"gaussian")
   row.order = c(row.order,T)
@@ -86,7 +89,31 @@ print(type)
 # tune lambda
 cv.fitl = vector("list",Kmax-Kmin+1)
 for(k in (Kmin:Kmax-1) ){
-  cv.fitl[[k]] = tune.iClusterPlus(cpus=cores,dt1=dtl[[1]],dt2=dtl[[2]],dt3=dtl[[3]],dt4=dtl[[4]], type=type, n.lambda=NULL,K=k,maxiter=20)
+  #cv.fitl[[k]] = tune.iClusterPlus(cpus=cores,dt1=dtl[[1]],dt2=dtl[[2]],dt3=dtl[[3]],dt4=dtl[[4]], type=type, n.lambda=NULL,K=k,maxiter=20)
+  if(length(dtl)==1){
+	cv.fitl[[k]] = tune.iClusterPlus(cpus=cores,
+		dt1=matrix(as.numeric(unlist(dtl[[1]])),nrow=nrow(dtl[[1]])),
+		type=type, n.lambda=NULL,K=k,maxiter=20)
+  }else if(length(dtl)==2){
+    cv.fitl[[k]] = tune.iClusterPlus(cpus=cores,
+      dt1=matrix(as.numeric(unlist(dtl[[1]])),nrow=nrow(dtl[[1]])),
+      dt2=matrix(as.numeric(unlist(dtl[[2]])),nrow=nrow(dtl[[2]])),
+      type=type, n.lambda=NULL,K=k,maxiter=20)
+  }else if(length(dtl)==3){
+    cv.fitl[[k]] = tune.iClusterPlus(cpus=cores,
+      dt1=matrix(as.numeric(unlist(dtl[[1]])),nrow=nrow(dtl[[1]])),
+      dt2=matrix(as.numeric(unlist(dtl[[2]])),nrow=nrow(dtl[[2]])),
+      dt3=matrix(as.numeric(unlist(dtl[[3]])),nrow=nrow(dtl[[3]])),
+      type=type, n.lambda=NULL,K=k,maxiter=20)
+  }else if(length(dtl)==4){
+    cv.fitl[[k]] = tune.iClusterPlus(cpus=cores,
+      dt1=matrix(as.numeric(unlist(dtl[[1]])),nrow=nrow(dtl[[1]])),
+      dt2=matrix(as.numeric(unlist(dtl[[2]])),nrow=nrow(dtl[[2]])),
+      dt3=matrix(as.numeric(unlist(dtl[[3]])),nrow=nrow(dtl[[3]])),
+      dt4=matrix(as.numeric(unlist(dtl[[4]])),nrow=nrow(dtl[[4]])),
+      type=type, n.lambda=NULL,K=k,maxiter=20)
+  }
+  
   cv.fittmp = cv.fitl[[k]]
   save(cv.fittmp, file=paste(opt$out,"cv.fit.K",k+1,".Rdata",sep=""))
 }
