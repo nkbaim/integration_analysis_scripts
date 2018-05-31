@@ -32,6 +32,11 @@ Cdata = NULL
 Rdata = NULL
 Mdata = NULL
 
+if(!is.null(opt$out)){
+  if(!dir.exists(opt$out)){
+    dir.create(opt$out)
+  }
+}
 
 #dtl = vector("list",4)
 dtl=list()
